@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Offset Vault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;700&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="0x108/index.js" onerror="window.__versions_0x108=null"></script>
+<script src="theo/index.js" onerror="window.__versions_theo=null"></script>
+<script src="jonah/index.js" onerror="window.__versions_jonah=null"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #09090f;
+  --bg2: #0e0e18;
+  --surface: rgba(255,255,255,0.04);
+  --surface2: rgba(255,255,255,0.07);
+  --border: rgba(255,255,255,0.08);
+  --border-hi: rgba(139,92,246,0.5);
+  --accent: #8b5cf6;
+  --accent2: #a78bfa;
+  --accent3: #c4b5fd;
+  --accent4: #ede9fe;
+  --red: #f87171;
+  --text: #f1f0ff;
+  --text2: #a09ec0;
+  --text3: #4b4870;
+  --mono: 'Geist Mono', monospace;
+  --sans: 'Geist', sans-serif;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+}
+
+html, body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.4); border-radius: 99px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* BG */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.18;
+}
+.bg-orb-1 {
+  width: 700px; height: 700px;
+  top: -200px; left: -100px;
+  background: radial-gradient(circle, #7c3aed, transparent 70%);
+  animation: orbFloat 18s ease-in-out infinite;
+}
+.bg-orb-2 {
+  width: 500px; height: 500px;
+  bottom: -100px; right: -100px;
+  background: radial-gradient(circle, #4f46e5, transparent 70%);
+  animation: orbFloat 24s ease-in-out infinite reverse;
+}
+.bg-orb-3 {
+  width: 300px; height: 300px;
+  top: 40%; left: 60%;
+  background: radial-gradient(circle, #7c3aed, transparent 70%);
+  opacity: 0.08;
+  animation: orbFloat 14s ease-in-out infinite 4s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.97); }
+}
+.bg-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(139,92,246,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139,92,246,0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black 20%, transparent 100%);
+}
+
+/* LAYOUT */
+.page { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 110px 24px 80px; gap: 72px; }
+
+/* HEADER */
+.header {
+  text-align: center;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease) 0.05s forwards;
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 99px;
+  border: 1px solid rgba(139,92,246,0.3);
+  background: rgba(139,92,246,0.08);
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--accent3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.eyebrow-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent2);
+  box-shadow: 0 0 8px var(--accent2);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(0.8); }
+}
+h1 {
+  font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 20px;
+  font-family: var(--sans);
+}
+h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--accent2) 0%, #c084fc 50%, var(--accent3) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.subtitle {
+  color: var(--text2);
+  font-size: clamp(0.88rem, 2vw, 1rem);
+  max-width: 460px;
+  margin: 0 auto;
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+/* TABS WRAP */
+.tabs-wrap {
+  width: 100%;
+  max-width: 920px;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease) 0.18s forwards;
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: fit-content;
+}
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tab-btn:hover { color: var(--text2); background: var(--surface2); }
+.tab-btn.active {
+  color: var(--text);
+  background: rgba(139,92,246,0.18);
+  box-shadow: 0 0 0 1px rgba(139,92,246,0.35);
+}
+.tab-btn i { font-size: 0.95rem; }
+
+/* PANEL */
+.source-panel { display: none; }
+.source-panel.active { display: block; }
+
+/* TOOLBAR */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.search-wrap { flex: 1; min-width: 200px; position: relative; }
+.search-wrap i {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3); font-size: 0.95rem; pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input::placeholder { color: var(--text3); }
+.search-input:focus {
+  border-color: rgba(139,92,246,0.45);
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+}
+.stats-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.73rem;
+  color: var(--text2);
+  white-space: nowrap;
+}
+
+/* VERSION LIST */
+.version-list { display: flex; flex-direction: column; gap: 8px; }
+
+.version-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.version-row:hover {
+  border-color: rgba(139,92,246,0.3);
+  box-shadow: 0 0 0 1px rgba(139,92,246,0.08), 0 4px 24px rgba(0,0,0,0.3);
+}
+.version-row.latest {
+  border-color: rgba(139,92,246,0.25);
+  background: rgba(139,92,246,0.04);
+}
+
+.version-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.version-header:hover { background: rgba(255,255,255,0.02); }
+
+.version-tag {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--accent3);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.latest-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: rgba(139,92,246,0.15);
+  border: 1px solid rgba(139,92,246,0.35);
+  font-size: 0.65rem;
+  font-family: var(--mono);
+  color: var(--accent3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.latest-badge-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent2);
+  box-shadow: 0 0 6px var(--accent2);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+.file-count {
+  font-size: 0.72rem;
+  color: var(--text3);
+  font-family: var(--mono);
+  flex-shrink: 0;
+}
+
+.chevron {
+  color: var(--text3);
+  font-size: 0.95rem;
+  transition: transform 0.25s var(--ease);
+  flex-shrink: 0;
+}
+.version-row.open .chevron { transform: rotate(180deg); }
+
+/* FILE GRID */
+.file-grid-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s var(--ease);
+}
+.version-row.open .file-grid-wrap { grid-template-rows: 1fr; }
+.file-grid-inner { overflow: hidden; }
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+  padding: 4px 18px 18px;
+}
+
+.file-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text2);
+  font-family: var(--mono);
+  font-size: 0.73rem;
+  transition: all 0.18s ease;
+  overflow: hidden;
+  position: relative;
+}
+.file-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(139,92,246,0.08), transparent);
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+.file-link:hover {
+  border-color: rgba(139,92,246,0.4);
+  color: var(--accent3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(139,92,246,0.15);
+}
+.file-link:hover::before { opacity: 1; }
+.file-link i {
+  font-size: 1rem;
+  flex-shrink: 0;
+  color: var(--accent2);
+  opacity: 0.6;
+  transition: opacity 0.18s;
+  position: relative;
+}
+.file-link:hover i { opacity: 1; }
+.file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: relative; }
+
+/* EMPTY / LOADING */
+.empty-state {
+  text-align: center; padding: 60px 24px; color: var(--text3);
+}
+.empty-state i { font-size: 2.2rem; margin-bottom: 14px; display: block; opacity: 0.4; }
+.empty-state p { font-size: 0.85rem; font-family: var(--mono); }
+
+.loading-state {
+  text-align: center; padding: 60px 24px;
+  color: var(--text3); font-family: var(--mono); font-size: 0.8rem;
+}
+.spinner {
+  width: 26px; height: 26px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent2);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* FOOTER */
+footer {
+  position: relative; z-index: 1;
+  text-align: center; padding: 28px 24px;
+  border-top: 1px solid var(--border);
+  background: rgba(9,9,15,0.6);
+  backdrop-filter: blur(20px);
+}
+.footer-meta {
+  font-size: 0.72rem; color: var(--text3); line-height: 1.8;
+}
+.footer-meta a { color: var(--text3); text-decoration: none; transition: color 0.2s; }
+.footer-meta a:hover { color: var(--accent3); }
+.footer-links { margin-top: 10px; }
+.footer-gh {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 0.73rem; color: var(--text3);
+  text-decoration: none; padding: 5px 14px; border-radius: 8px;
+  border: 1px solid var(--border); transition: all 0.2s;
+}
+.footer-gh:hover { color: var(--accent3); border-color: rgba(139,92,246,0.35); background: rgba(139,92,246,0.06); }
+.footer-gh i { font-size: 0.9rem; }
+
+/* MODAL */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: all; }
+.modal {
+  width: 100%; max-width: 860px; max-height: 80vh;
+  background: #0d0d18;
+  border: 1px solid rgba(139,92,246,0.2);
+  border-radius: 16px;
+  display: flex; flex-direction: column; overflow: hidden;
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.28s var(--ease);
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(139,92,246,0.08);
+}
+.modal-backdrop.open .modal { transform: translateY(0) scale(1); }
+.modal-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: rgba(139,92,246,0.04);
+}
+.modal-title {
+  font-family: var(--mono); font-size: 0.8rem;
+  color: var(--accent3); flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.modal-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.modal-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 7px;
+  background: rgba(139,92,246,0.1);
+  border: 1px solid rgba(139,92,246,0.2);
+  color: var(--accent3);
+  font-family: var(--sans); font-size: 0.76rem; font-weight: 500;
+  cursor: pointer; transition: all 0.18s; text-decoration: none;
+}
+.modal-btn:hover { background: rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.45); }
+.modal-btn.close { background: transparent; border-color: var(--border); color: var(--text3); }
+.modal-btn.close:hover { border-color: rgba(248,113,113,0.4); color: var(--red); background: rgba(248,113,113,0.06); }
+.modal-body { flex: 1; overflow: auto; }
+.modal-body pre {
+  margin: 0; padding: 20px;
+  font-family: var(--mono); font-size: 0.76rem;
+  line-height: 1.75; color: var(--text2);
+  white-space: pre; tab-size: 4;
+}
+.modal-loading {
+  display: flex; align-items: center; justify-content: center;
+  padding: 60px; gap: 12px;
+  color: var(--text3); font-family: var(--mono); font-size: 0.8rem;
+}
+
+/* API SECTION */
+.api-section {
+  width: 100%; max-width: 920px;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--ease) 0.32s forwards;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.section-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-family: var(--mono);
+  color: var(--accent3); letter-spacing: 0.12em;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.section-label::before {
+  content: '';
+  display: block; width: 16px; height: 1px;
+  background: var(--accent2); opacity: 0.6;
+}
+.api-desc {
+  font-size: 0.86rem; color: var(--text2);
+  line-height: 1.75; font-weight: 300; max-width: 560px;
+}
+.api-tabs { display: flex; gap: 6px; }
+.api-tab {
+  padding: 6px 16px; border-radius: 7px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text3); font-family: var(--mono); font-size: 0.76rem;
+  cursor: pointer; transition: all 0.18s;
+}
+.api-tab:hover { color: var(--text2); border-color: rgba(139,92,246,0.3); }
+.api-tab.active {
+  background: rgba(139,92,246,0.12);
+  border-color: rgba(139,92,246,0.35);
+  color: var(--accent3);
+}
+.api-panel { display: none; }
+.api-panel.active { display: block; }
+
+.code-block {
+  position: relative;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.code-block-bar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-dot-r { background: #ff5f57; }
+.code-dot-y { background: #febc2e; }
+.code-dot-g { background: #28c840; }
+.code-block pre {
+  padding: 18px 20px;
+  font-family: var(--mono); font-size: 0.75rem;
+  line-height: 1.8; color: var(--text2);
+  overflow-x: auto; white-space: pre; tab-size: 2;
+}
+.code-copy {
+  position: absolute; top: 10px; right: 12px;
+  padding: 5px 10px; border-radius: 6px;
+  background: rgba(139,92,246,0.1);
+  border: 1px solid rgba(139,92,246,0.2);
+  color: var(--accent3); font-size: 0.82rem;
+  cursor: pointer; transition: all 0.18s;
+  display: flex; align-items: center;
+}
+.code-copy:hover { background: rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.45); }
+
+/* TOAST */
+.toastify {
+  background: rgba(13,13,24,0.97) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139,92,246,0.25) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+  border-radius: 10px !important;
+  font-family: var(--sans) !important;
+  padding: 12px 18px !important;
+  font-size: 0.84rem !important;
+  color: var(--text) !important;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .file-grid { grid-template-columns: 1fr 1fr; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-noise"></div>
+</div>
+
+<div class="page">
+  <main>
+
+    <div class="header">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Roblox Offset Archive
+      </div>
+      <h1>Offset <em>Vault</em></h1>
+      <p class="subtitle">Archived offsets and feature flags across all tracked Roblox versions, organized by source.</p>
+    </div>
+
+    <div class="tabs-wrap">
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('0x108', this)">
+          <i class="ph ph-database"></i> 0x108
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('theo', this)">
+          <i class="ph ph-database"></i> theo
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('jonah', this)">
+          <i class="ph ph-database"></i> jonah
+        </button>
+      </div>
+
+      <div id="panel-0x108" class="source-panel active">
+        <div class="loading-state"><div class="spinner"></div>Loading versions…</div>
+      </div>
+      <div id="panel-theo" class="source-panel">
+        <div class="loading-state"><div class="spinner"></div>Loading versions…</div>
+      </div>
+      <div id="panel-jonah" class="source-panel">
+        <div class="loading-state"><div class="spinner"></div>Loading versions…</div>
+      </div>
+    </div>
+
+    <div class="api-section">
+      <div>
+        <div class="section-label">API Usage</div>
+        <p class="api-desc">All files are accessible as static URLs. Fetch the version index, then grab any file directly.</p>
+      </div>
+
+      <div class="api-tabs">
+        <button class="api-tab active" onclick="switchApiTab('cpp', this)">C++</button>
+        <button class="api-tab" onclick="switchApiTab('c', this)">C</button>
+        <button class="api-tab" onclick="switchApiTab('py', this)">Python</button>
+      </div>
+
+      <div class="api-panel active" id="api-cpp">
+        <div class="code-block">
+          <div class="code-block-bar">
+            <span class="code-dot code-dot-r"></span>
+            <span class="code-dot code-dot-y"></span>
+            <span class="code-dot code-dot-g"></span>
+          </div>
+          <button class="code-copy" onclick="copyCode('api-cpp-code')"><i class="ph ph-copy"></i></button>
+          <pre id="api-cpp-code">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;curl/curl.h&gt;
+#include &lt;nlohmann/json.hpp&gt;
+
+using json = nlohmann::json;
+
+static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* out) {
+    out->append((char*)contents, size * nmemb);
+    return size * nmemb;
+}
+
+std::string HttpGet(const std::string& url) {
+    CURL* curl = curl_easy_init();
+    std::string response;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+    return response;
+}
+
+int main() {
+    const std::string BASE = "https://brn3d.github.io/0x67";
+    const std::string source = "0x108";
+
+    json index = json::parse(HttpGet(BASE + "/" + source + "/index.json"));
+    std::string latest = index["versions"].back();
+
+    json offsets = json::parse(HttpGet(BASE + "/" + source + "/" + latest + "/offsets.json"));
+
+    std::cout &lt;&lt; "Version: " &lt;&lt; latest &lt;&lt; std::endl;
+    std::cout &lt;&lt; offsets.dump(2) &lt;&lt; std::endl;
+    return 0;
+}</pre>
+        </div>
+      </div>
+
+      <div class="api-panel" id="api-c">
+        <div class="code-block">
+          <div class="code-block-bar">
+            <span class="code-dot code-dot-r"></span>
+            <span class="code-dot code-dot-y"></span>
+            <span class="code-dot code-dot-g"></span>
+          </div>
+          <button class="code-copy" onclick="copyCode('api-c-code')"><i class="ph ph-copy"></i></button>
+          <pre id="api-c-code">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;curl/curl.h&gt;
+
+struct Buffer { char* data; size_t size; };
+
+static size_t WriteCallback(void* contents, size_t size, size_t nmemb, struct Buffer* buf) {
+    size_t total = size * nmemb;
+    buf->data = realloc(buf->data, buf->size + total + 1);
+    memcpy(buf->data + buf->size, contents, total);
+    buf->size += total;
+    buf->data[buf->size] = '\0';
+    return total;
+}
+
+char* http_get(const char* url) {
+    CURL* curl = curl_easy_init();
+    struct Buffer buf = { malloc(1), 0 };
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf);
+    curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+    return buf.data;
+}
+
+int main(void) {
+    const char* base = "https://brn3d.github.io/0x67";
+    char url[256];
+    snprintf(url, sizeof(url), "%s/0x108/index.json", base);
+    char* index_json = http_get(url);
+    printf("Index: %s\n", index_json);
+    free(index_json);
+    return 0;
+}</pre>
+        </div>
+      </div>
+
+      <div class="api-panel" id="api-py">
+        <div class="code-block">
+          <div class="code-block-bar">
+            <span class="code-dot code-dot-r"></span>
+            <span class="code-dot code-dot-y"></span>
+            <span class="code-dot code-dot-g"></span>
+          </div>
+          <button class="code-copy" onclick="copyCode('api-py-code')"><i class="ph ph-copy"></i></button>
+          <pre id="api-py-code">import urllib.request, json
+
+BASE = "https://brn3d.github.io/0x67"
+
+def get_latest_offsets(source="0x108"):
+    with urllib.request.urlopen(f"{BASE}/{source}/index.json") as r:
+        index = json.load(r)
+    latest = index["versions"][-1]
+
+    with urllib.request.urlopen(f"{BASE}/{source}/{latest}/offsets.json") as r:
+        offsets = json.load(r)
+
+    print(f"Version: {latest}")
+    return offsets
+
+offsets = get_latest_offsets("0x108")</pre>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="modal-backdrop" id="viewer-backdrop" onclick="closeViewer(event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="viewer-title">
+      <div class="modal-header">
+        <i class="ph ph-file-code" style="color:var(--accent2);font-size:1rem;flex-shrink:0"></i>
+        <span class="modal-title" id="viewer-title"></span>
+        <div class="modal-actions">
+          <button class="modal-btn" id="viewer-raw" onclick="openRaw()">
+            <i class="ph ph-arrow-square-out"></i> Raw
+          </button>
+          <button class="modal-btn" onclick="copyViewer()">
+            <i class="ph ph-copy"></i> Copy
+          </button>
+          <button class="modal-btn close" onclick="closeViewer()">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body" id="viewer-body">
+        <div class="modal-loading"><div class="spinner"></div> Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/brn3d/0x67" class="footer-gh" target="_blank" rel="noopener">
+        <i class="ph ph-github-logo"></i> Source Code
+      </a>
+    </div>
+    <div class="footer-meta" style="margin-top:10px">© 2026 Offset Vault. All rights reserved.</div>
+  </footer>
+</div>
+
+<script>
+const SOURCES = {
+  "0x108": { files: ["offsets.hpp", "FFlags.hpp", "offsets_structured.hpp", "offsets.json"] },
+  "theo":  { files: ["Offsets.hpp", "Offsets.cs", "Offsets.json", "Offsets.txt", "FFlags.hpp", "FFlags.cs", "FFlags.json"] },
+  "jonah": { files: ["offsets.h", "offsets.py", "offsets.cs", "offsets.json"] },
+};
+
+function fileIcon(name) {
+  const ext = name.split('.').pop().toLowerCase();
+  if (ext === 'json') return 'ph-brackets-curly';
+  if (ext === 'hpp' || ext === 'h') return 'ph-file-cpp';
+  if (ext === 'cs') return 'ph-file-cs';
+  if (ext === 'py') return 'ph-file-py';
+  if (ext === 'txt') return 'ph-file-text';
+  return 'ph-file';
+}
+
+const state = {
+  "0x108": { versions: [], filtered: [], loaded: false },
+  "theo":  { versions: [], filtered: [], loaded: false },
+  "jonah": { versions: [], filtered: [], loaded: false },
+};
+let activeTab = "0x108";
+
+function switchTab(source, btn) {
+  activeTab = source;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b === btn);
+    b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+  });
+  document.querySelectorAll('.source-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${source}`).classList.add('active');
+  if (!state[source].loaded) loadSource(source);
+}
+
+async function loadSource(source) {
+  const panel = document.getElementById(`panel-${source}`);
+  try {
+    const safeKey = source.replace(/-/g, '_').replace(/\./g, '_');
+    let versions = window[`__versions_${safeKey}`];
+
+    if (versions === undefined) {
+      try {
+        const res = await fetch(`${source}/index.json`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        versions = data.versions || [];
+      } catch (_) {
+        versions = null;
+      }
+    }
+
+    if (versions === null) {
+      throw new Error('Could not load version data. Make sure dumper.py has been run.');
+    }
+
+    const sorted = versions.slice().reverse();
+    state[source].versions = sorted;
+    state[source].filtered = sorted;
+    state[source].loaded = true;
+    renderPanel(source);
+  } catch (err) {
+    panel.innerHTML = `
+      <div class="empty-state">
+        <i class="ph ph-warning-circle"></i>
+        <p>Could not load versions.<br><span style="opacity:0.4;font-size:0.7rem">${err.message}</span></p>
+      </div>`;
+  }
+}
+
+function renderPanel(source) {
+  const panel = document.getElementById(`panel-${source}`);
+  const { filtered, versions } = state[source];
+  const files = SOURCES[source].files;
+
+  const toolbar = `
+    <div class="toolbar">
+      <div class="search-wrap">
+        <i class="ph ph-magnifying-glass"></i>
+        <input class="search-input" type="text" placeholder="Search versions…"
+          oninput="filterVersions('${source}', this.value)" aria-label="Search versions" />
+      </div>
+      <div class="stats-pill" id="stats-${source}">
+        <i class="ph ph-stack"></i>
+        <span>${versions.length} version${versions.length !== 1 ? 's' : ''}</span>
+      </div>
+    </div>`;
+
+  if (filtered.length === 0) {
+    panel.innerHTML = toolbar + `<div class="empty-state"><i class="ph ph-archive"></i><p>No versions archived yet.</p></div>`;
+    return;
+  }
+
+  const rows = filtered.map((ver, idx) => {
+    const isLatest = idx === 0 && filtered === state[source].versions;
+    const latestBadge = isLatest
+      ? `<span class="latest-badge"><span class="latest-badge-dot"></span>latest</span>` : '';
+    const fileLinks = files.map(f => `
+      <a href="${source}/${ver}/${f}" class="file-link" title="${f}"
+         onclick="openViewer(event, '${source}/${ver}/${f}', '${f}')">
+        <i class="ph ${fileIcon(f)}"></i>
+        <span class="file-name">${f}</span>
+      </a>`).join('');
+
+    return `
+      <div class="version-row${isLatest ? ' latest' : ''}" id="row-${source}-${idx}">
+        <div class="version-header" onclick="toggleRow('${source}', ${idx})" role="button" tabindex="0"
+             onkeydown="if(event.key==='Enter'||event.key===' ')toggleRow('${source}',${idx})">
+          <span class="version-tag">${ver}</span>
+          ${latestBadge}
+          <span class="file-count">${files.length} files</span>
+          <i class="ph ph-caret-down chevron"></i>
+        </div>
+        <div class="file-grid-wrap">
+          <div class="file-grid-inner">
+            <div class="file-grid">${fileLinks}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  panel.innerHTML = toolbar + `<div class="version-list">${rows}</div>`;
+  if (filtered.length > 0) toggleRow(source, 0);
+}
+
+function toggleRow(source, idx) {
+  const row = document.getElementById(`row-${source}-${idx}`);
+  if (row) row.classList.toggle('open');
+}
+
+function filterVersions(source, query) {
+  const q = query.trim().toLowerCase();
+  const all = state[source].versions;
+  state[source].filtered = q ? all.filter(v => v.toLowerCase().includes(q)) : all;
+  renderPanel(source);
+  const input = document.querySelector(`#panel-${source} .search-input`);
+  if (input) { input.value = query; input.focus(); }
+}
+
+function createToast(icon, text) {
+  const d = document.createElement('div');
+  d.style.cssText = 'display:flex;align-items:center;gap:10px;';
+  d.innerHTML = `<i class="ph ${icon}" style="font-size:1.1rem;color:#a78bfa"></i><span>${text}</span>`;
+  return d;
+}
+
+function switchApiTab(id, btn) {
+  document.querySelectorAll('.api-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.api-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`api-${id}`).classList.add('active');
+}
+
+function copyCode(id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    Toastify({ node: createToast('ph-check-circle', 'Copied to clipboard'), duration: 3000, gravity: 'bottom', position: 'right' }).showToast();
+  });
+}
+
+let viewerContent = '';
+let viewerPath = '';
+
+async function openViewer(e, path, filename) {
+  e.preventDefault();
+  if (location.protocol === 'file:') { window.open(path, '_blank'); return; }
+
+  viewerPath = path;
+  const backdrop = document.getElementById('viewer-backdrop');
+  const body = document.getElementById('viewer-body');
+  document.getElementById('viewer-title').textContent = path;
+  body.innerHTML = '<div class="modal-loading"><div class="spinner"></div> Loading…</div>';
+  backdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    viewerContent = text;
+    const pre = document.createElement('pre');
+    pre.textContent = text;
+    body.innerHTML = '';
+    body.appendChild(pre);
+  } catch (err) {
+    body.innerHTML = `<div class="modal-loading" style="color:#f87171">Failed to load: ${err.message}</div>`;
+  }
+}
+
+function openRaw() {
+  if (!viewerPath) return;
+  const raw = `https://raw.githubusercontent.com/brn3d/0x67/refs/heads/main/website/${viewerPath}`;
+  window.open(raw, '_blank', 'noopener');
+}
+
+function closeViewer(e) {  if (e && e.target !== document.getElementById('viewer-backdrop')) return;
+  document.getElementById('viewer-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+  viewerContent = '';
+}
+
+function copyViewer() {
+  if (!viewerContent) return;
+  navigator.clipboard.writeText(viewerContent).then(() => {
+    Toastify({ node: createToast('ph-check-circle', 'Copied to clipboard'), duration: 3000, gravity: 'bottom', position: 'right' }).showToast();
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('viewer-backdrop').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+loadSource('0x108');
+</script>
+</body>
+</html>
